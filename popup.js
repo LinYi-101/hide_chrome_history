@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chrome.runtime.sendMessage({ action: 'clearByKeyword', keyword }, (response) => {
       status.textContent = response.message;
+      status.style.setProperty("display", "block");
     });
   });
 
