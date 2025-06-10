@@ -1,0 +1,26 @@
+{
+  "ext_name": {
+    "message": "Hide Chrome History"
+  },
+  "manual_clear_title": {
+    "message": "手动清除历史记录"
+  },
+  "keyword_label": {
+    "message": "关键词列表（每行一个）"
+  },
+  "interval_label": {
+    "message": "清理周期（单位：秒）"
+  },
+  "save_button": {
+    "message": "保存设置"
+  },
+  "clear_button": {
+    "message": "立即清除"
+  },
+  "status_saved": {
+    "message": "设置已保存。"
+  },
+  "status_placeholder": {
+    "message": "请输入关键词或正则表达式..."
+  }
+}

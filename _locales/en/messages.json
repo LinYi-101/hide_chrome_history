@@ -1,0 +1,26 @@
+{
+  "ext_name": {
+    "message": "Hide Chrome History"
+  },
+  "manual_clear_title": {
+    "message": "Manual History Cleaner"
+  },
+  "keyword_label": {
+    "message": "Keyword list (one per line)"
+  },
+  "interval_label": {
+    "message": "Cleanup interval (in seconds)"
+  },
+  "save_button": {
+    "message": "Save Settings"
+  },
+  "clear_button": {
+    "message": "Clear Now"
+  },
+  "status_saved": {
+    "message": "Settings saved."
+  },
+  "status_placeholder": {
+    "message": "Enter a keyword or regex to clear..."
+  }
+}
