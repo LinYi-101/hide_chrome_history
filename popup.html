@@ -1,20 +1,155 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body { width: 300px; padding: 10px; font-family: sans-serif; }
-    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-    button { width: 100%; padding: 8px; cursor: pointer; background: #d9534f; color: white; border: none; }
-  </style>
-</head>
-<body>
-  <h4>配置拦截正则表达式</h4>
-  <p style="font-size: 12px; color: #666;">每行输入一个正则，匹配即删</p>
-  <textarea id="regexInput" placeholder="例如: \/secret\/ \n google\.com\/search\?q=test"></textarea>
-  <button id="saveBtn">保存并生效</button>
-  <div id="status" style="margin-top: 10px; font-size: 12px; color: green;"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      :root {
+        --primary-color: #1a73e8; /* Chrome 蓝色 */
+        --danger-color: #d93025; /* 警告红色 */
+        --bg-color: #ffffff;
+        --text-color: #202124;
+        --border-color: #dadce0;
+      }
 
-  <script src="popup.js"></script>
-</body>
+      body {
+        width: 320px;
+        margin: 0;
+        padding: 16px;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      /* 顶部导航栏 */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 2px 4px;
+        font-size: 11px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .description {
+        font-size: 12px;
+        color: #5f6368;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+
+      /* 输入区域 */
+      textarea {
+        width: 100%;
+        height: 120px;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        resize: none;
+        font-family: "Consolas", monospace; /* 代码字体 */
+        font-size: 13px;
+        background-color: #f8f9fa;
+        outline: none;
+        transition: border 0.2s;
+      }
+
+      textarea:focus {
+        border: 2px solid var(--primary-color);
+        padding: 9px; /* 补偿边框增加的 1px */
+      }
+
+      /* 按钮样式 */
+      .footer {
+        margin-top: 16px;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background-color: var(--primary-color);
+        color: white;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s, box-shadow 0.2s;
+      }
+
+      button:hover {
+        background-color: #1557b0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      button:active {
+        background-color: #174ea6;
+      }
+
+      button:disabled {
+        background-color: #bdc1c6;
+        cursor: not-allowed;
+      }
+
+      /* 状态提示 */
+      #status {
+        margin-top: 12px;
+        font-size: 12px;
+        text-align: center;
+        min-height: 18px;
+        transition: all 0.3s;
+      }
+
+      #status.success {
+        color: #1e8e3e !important;
+        font-weight: bold;
+      }
+      #status.info {
+        color: var(--primary-color) !important;
+      }
+      #status.error {
+        color: var(--danger-color) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h4 id="ui-title">正则历史过滤</h4>
+      <select id="langSelect">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <p class="description" id="ui-desc">
+      符合以下正则的历史记录将被实时拦截并清理：
+    </p>
+
+    <textarea
+      id="regexInput"
+      spellcheck="false"
+      placeholder="例如: .*google.com/search?.*q=.*"
+    ></textarea>
+
+    <div class="footer">
+      <button id="saveBtn">
+        <span id="ui-button">保存并清理</span>
+      </button>
+      <div id="status"></div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
 </html>
