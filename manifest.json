@@ -1,23 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "__MSG_ext_name__",
+  "name": "Regex History Shield",
   "version": "1.0",
-  "description": "Automatically clears browsing history using keywords or regular expressions.",
+  "description": "实时拦截并删除匹配正则的历史记录",
   "permissions": [
     "history",
-    "alarms",
     "storage"
   ],
-  "default_locale": "en",
-  "action": {
-    "default_popup": "popup.html"
-  },
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_popup": "popup.html"
+  },
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "imgs/icon16.png",
+    "48": "imgs/icon48.png",
+    "128": "imgs/icon128.png"
   }
 }

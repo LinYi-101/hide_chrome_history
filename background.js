@@ -1,82 +1,45 @@
-function clearHistoryByRules(rules) {
-  const regexRules = [], keywordRules = [];
+// 缓存正则表达式列表，提高拦截速度
+let cachedRegexes = [];
 
-  for (const rule of rules) {
-    if (rule.startsWith('/') && rule.endsWith('/')) {
-      try { regexRules.push(new RegExp(rule.slice(1, -1))); }
-      catch (e) { console.warn("Invalid regex:", rule); }
-    } else {
-      keywordRules.push(rule.toLowerCase());
-    }
-  }
+// 从存储中加载正则
+// background.js
 
-  chrome.history.search({ text: '', maxResults: 10000, startTime: 0 }, results => {
-    let deleted = 0;
-    results.forEach(item => {
-      const url = item.url.toLowerCase();
-      const match = keywordRules.some(k => url.includes(k)) ||
-                    regexRules.some(r => r.test(item.url));
-      if (match) {
-        chrome.history.deleteUrl({ url: item.url });
-        deleted++;
+function updateCache() {
+  chrome.storage.local.get(['regexList'], (result) => {
+    // 如果存储中没有（第一次运行），则使用默认正则
+    const defaultRegex = [".*google.com/search?.*q=.*"];
+    const list = result.regexList || defaultRegex;
+    
+    cachedRegexes = list.map(pattern => {
+      try {
+        return new RegExp(pattern, 'i');
+      } catch (e) {
+        return null;
       }
-    });
-    console.log(`[cleaner] Removed ${deleted} matching items.`);
+    }).filter(Boolean);
   });
 }
 
-let currentTimer = null;
-function schedule(intervalSec) {
-  if (currentTimer) clearTimeout(currentTimer);
-  currentTimer = setTimeout(runCleanup, intervalSec * 1000);
-}
+// 初始化加载
+updateCache();
 
-function runCleanup() {
-  chrome.storage.local.get(['keywords', 'intervalSec'], data => {
-    const rules = data.keywords || [];
-    const interval = data.intervalSec || 3600;
-    clearHistoryByRules(rules);
-    schedule(interval);
-  });
-}
-
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.get(['keywords', 'intervalSec'], data => {
-    const rules = data.keywords || ['/google.com/search?.*q=.*/'];
-    const interval = data.intervalSec || 1;
-    clearHistoryByRules(rules);
-    schedule(interval);
-  });
+// 监听存储变化（当用户在 popup 修改正则时，立即更新后台缓存）
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.regexList) {
+    updateCache();
+  }
 });
 
-chrome.runtime.onStartup.addListener(() => {
-  chrome.storage.local.get(['intervalSec'], data => {
-    schedule(data.intervalSec || 3600);
-  });
-});
+// 核心：实时拦截监听器
+chrome.history.onVisited.addListener((historyItem) => {
+  const { url, title } = historyItem;
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === 'clearByKeyword') {
-    const rule = msg.keyword.trim();
-    chrome.history.search({ text: '', maxResults: 10000, startTime: 0 }, results => {
-      let match = [];
-      if (rule.startsWith('/') && rule.endsWith('/')) {
-        try {
-          const regex = new RegExp(rule.slice(1, -1));
-          match = results.filter(i => regex.test(i.url));
-        } catch {
-          sendResponse({ message: 'Invalid regex' });
-          return;
-        }
-      } else {
-        match = results.filter(i => i.url.toLowerCase().includes(rule.toLowerCase()));
-      }
-      match.forEach(i => chrome.history.deleteUrl({ url: i.url }));
-      sendResponse({ message: `Deleted ${match.length} items.` });
+  // 检查是否匹配任何一个正则
+  const isMatch = cachedRegexes.some(re => re.test(url) || re.test(title));
+
+  if (isMatch) {
+    chrome.history.deleteUrl({ url: url }, () => {
+      console.log(`[已拦截] 已删除匹配的历史记录: ${url}`);
     });
-    return true;
-  }
-  if (msg.action === 'updateAlarm') {
-    schedule(msg.intervalSec || 3600);
   }
 });
