@@ -3,12 +3,10 @@
   "name": "Regex History Shield",
   "version": "1.0",
   "description": "实时拦截并删除匹配正则的历史记录",
-  "permissions": [
-    "history",
-    "storage"
-  ],
+  "permissions": ["history", "storage", "notifications","alarms"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "popup.html"
