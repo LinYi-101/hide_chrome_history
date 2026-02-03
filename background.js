@@ -9,7 +9,6 @@ function updateCache() {
     // 如果存储中没有（第一次运行），则使用默认正则
     const defaultRegex = [".*google.com/search?.*q=.*"];
     const list = result.regexList || defaultRegex;
-
     cachedRegexes = list
       .map((pattern) => {
         try {
@@ -47,19 +46,10 @@ chrome.history.onVisited.addListener((historyItem) => {
   }
 });
 
-// --- 核心清理逻辑封装 ---
+// --- 1 核心清理逻辑封装 ---
 async function performCleanup() {
   console.log("正在执行清理任务...");
-
-  // 1. 从 storage 中获取用户定义的正则字符串列表
-  const data = await chrome.storage.local.get("regexList");
-  const regexStrings = data.regexList || [];
-
-  if (regexStrings.length === 0) return;
-
-  // 将字符串转换为正则对象
-  const regexPatterns = regexStrings.map((str) => new RegExp(str));
-
+  console.log("cachedRegexes", cachedRegexes);
   // 2. 获取历史记录（例如过去 24 小时）
   const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
   const historyItems = await chrome.history.search({
@@ -67,11 +57,10 @@ async function performCleanup() {
     startTime: oneDayAgo,
     maxResults: 5000,
   });
-
   // 3. 执行匹配与删除
   historyItems.forEach((item) => {
-    const isMatch = regexPatterns.some(
-      (rx) => rx.test(item.url) || re.test(item.title)
+    const isMatch = cachedRegexes.some(
+      (re) => re.test(item.url) || re.test(item.title),
     );
     if (isMatch) {
       chrome.history.deleteUrl({ url: item.url });
@@ -79,22 +68,25 @@ async function performCleanup() {
   });
 }
 
-// --- 监听器设置 ---
+// 2. 监听【安装/刷新】事件 (确保你点击“刷新”按钮或刚安装时就会跑一次)
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("扩展已安装/更新，开始首次清理并设置闹钟");
+  performCleanup();
+  // 创建闹钟：每 60 分钟执行一次
+  chrome.alarms.create("periodicClean", {
+    periodInMinutes: 60,
+  });
+});
 
-// 1. 监听浏览器启动
+// 3. 监听【浏览器启动】事件
 chrome.runtime.onStartup.addListener(() => {
-  console.log("浏览器已启动，触发初始清理");
+  console.log("浏览器已启动，触发清理...");
   performCleanup();
 });
 
-// 2. 监听定时任务 (例如每 30 分钟)
+// 4. 监听【定时器】触发
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "cleanupTask") {
+  if (alarm.name === "periodicClean") {
     performCleanup();
   }
-});
-
-// 首次安装插件时，初始化定时器
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.alarms.create("cleanupTask", { periodInMinutes: 60 });
 });
