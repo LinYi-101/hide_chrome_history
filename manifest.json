@@ -4,6 +4,7 @@
   "version": "1.0",
   "description": "实时拦截并删除匹配正则的历史记录",
   "permissions": ["history", "storage", "notifications","alarms"],
+  "default_locale": "zh_CN",
   "background": {
     "service_worker": "background.js",
     "type": "module"
