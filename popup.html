@@ -71,6 +71,24 @@
         padding: 9px; /* 补偿边框增加的 1px */
       }
 
+      #tempCleanInput{
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        resize: none;
+        font-family: "Consolas", monospace; /* 代码字体 */
+        font-size: 13px;
+        background-color: #f8f9fa;
+        outline: none;
+        transition: border 0.2s;
+      }
+      #tempCleanInput:focus {
+        border: 2px solid var(--primary-color);
+        padding: 9px; /* 补偿边框增加的 1px */
+      }
+
       /* 按钮样式 */
       .footer {
         margin-top: 16px;
@@ -143,12 +161,21 @@
       placeholder="例如: .*google.com/search?.*q=.*"
     ></textarea>
 
-    <div class="footer">
+    <div class="footer" style="margin-bottom: 12px;">
       <button id="saveBtn">
         <span id="ui-button">保存并清理</span>
       </button>
-      <div id="status"></div>
     </div>
+
+    <input id="tempCleanInput" spellcheck="false" />
+
+    <div style="margin-top: 12px;">
+      <button id="tempCleanBtn">
+          <span>立即清理</span>
+      </button>
+    </div>
+
+    <div id="status"></div>
 
     <script src="popup.js"></script>
   </body>

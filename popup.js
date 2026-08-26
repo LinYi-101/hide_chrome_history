@@ -21,6 +21,8 @@ const langSelect = document.getElementById("langSelect");
 const regexInput = document.getElementById("regexInput");
 const saveBtn = document.getElementById("saveBtn");
 const statusMsg = document.getElementById("status"); // 确保 ID 对应 HTML 中的 div
+const cleanBtn = document.getElementById("tempCleanBtn");
+const cleanInput = document.getElementById("tempCleanInput");
 
 // --- 1. 初始化界面 ---
 chrome.storage.local.get(["regexList", "language"], (result) => {
@@ -112,4 +114,30 @@ saveBtn.addEventListener("click", async () => {
     statusMsg.textContent = i18n[lang].error;
     saveBtn.disabled = false; // 出错时恢复按钮
   }
+});
+
+
+cleanBtn.addEventListener("click", async () => {
+  const inputVal = cleanInput.value.trim();
+  const lang = langSelect.value;
+  statusMsg.className = "info";
+  statusMsg.textContent = i18n[lang].cleaning;
+  cleanBtn.disabled = true;
+  let deletedCount = 0;
+
+  const historyItems = await chrome.history.search({
+    text: inputVal,
+    startTime: 0,
+    maxResults: 99999,
+  });
+
+  for (const item of historyItems) {
+    await chrome.history.deleteUrl({ url: item.url });
+    deletedCount++;
+  }
+
+  statusMsg.className = "success"; // 切换到绿色类名
+  statusMsg.textContent = i18n[lang].success.replace("{count}", deletedCount);
+  cleanBtn.disabled = false;
+  
 });
