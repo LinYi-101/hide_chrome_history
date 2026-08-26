@@ -5,6 +5,8 @@ const i18n = {
     button: "保存并清理",
     cleaning: "正在清理存量历史...",
     success: "清理完成 ({count}条)，窗口即将关闭...",
+    tempCleanSuccess: "清理完成 ({count}条)",
+    tempCleanNotNull: "关键词不可为空",
     error: "保存失败或清理过程中出错。",
   },
   en: {
@@ -13,6 +15,8 @@ const i18n = {
     button: "Save & Clean",
     cleaning: "Cleaning existing history...",
     success: "Cleaned {count} items. Closing...",
+    tempCleanSuccess: "Cleaned {count} items.",
+    tempCleanNotNull: "keyword can't be null.",
     error: "Error during saving or cleaning.",
   },
 };
@@ -125,6 +129,13 @@ cleanBtn.addEventListener("click", async () => {
   cleanBtn.disabled = true;
   let deletedCount = 0;
 
+  if (!inputVal) {
+    cleanBtn.disabled = false;
+    statusMsg.className = "error";
+    statusMsg.textContent = i18n[lang].tempCleanNotNull;
+    return
+  }
+
   const historyItems = await chrome.history.search({
     text: inputVal,
     startTime: 0,
@@ -137,7 +148,6 @@ cleanBtn.addEventListener("click", async () => {
   }
 
   statusMsg.className = "success"; // 切换到绿色类名
-  statusMsg.textContent = i18n[lang].success.replace("{count}", deletedCount);
+  statusMsg.textContent = i18n[lang].tempCleanSuccess.replace("{count}", deletedCount);
   cleanBtn.disabled = false;
-  
 });
