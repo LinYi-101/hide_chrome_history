@@ -1,8 +1,6 @@
 // 缓存正则表达式列表，提高拦截速度
 let cachedRegexes = [];
 console.log("Service Worker 已启动！");
-// 从存储中加载正则
-// background.js
 
 function updateCache() {
   chrome.storage.local.get(["regexList"], (result) => {
@@ -41,7 +39,7 @@ chrome.history.onVisited.addListener((historyItem) => {
 
   if (isMatch) {
     chrome.history.deleteUrl({ url: url }, () => {
-      console.log(`[已拦截] 已删除匹配的历史记录: ${url}`);
+      console.log(`delete history: ${url}`);
     });
   }
 });
@@ -72,9 +70,9 @@ async function performCleanup() {
 chrome.runtime.onInstalled.addListener(() => {
   console.log("扩展已安装/更新，开始首次清理并设置闹钟");
   performCleanup();
-  // 创建闹钟：每 60 分钟执行一次
+  // 创建闹钟：每 120 分钟执行一次
   chrome.alarms.create("periodicClean", {
-    periodInMinutes: 60,
+    periodInMinutes: 120,
   });
 });
 
